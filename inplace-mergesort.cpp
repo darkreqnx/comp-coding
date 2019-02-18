@@ -29,6 +29,7 @@ void inplace_merge(int *arr, int start, int mid, int end){
 	}
 }
 
+/*
 void vanilla_merge(int *arr, int l, int m, int r){
 	int n1 = m - l + 1; int n2 = r - m;
 	
@@ -62,6 +63,7 @@ void vanilla_merge(int *arr, int l, int m, int r){
 		j++; k++;
 	}
 }
+*/
 
 //same as vanilla mergesort
 void mergeSort(int *arr, int l, int r){
@@ -71,8 +73,8 @@ void mergeSort(int *arr, int l, int r){
 		mergeSort(arr, l, m);
 		mergeSort(arr, m + 1, r);
 
-		// inplace_merge(arr, l, m, r);
-		vanilla_merge(arr, l, m, r);
+		inplace_merge(arr, l, m, r);
+		// vanilla_merge(arr, l, m, r);
 	}
 }
 
