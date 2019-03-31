@@ -28,16 +28,6 @@ void printVector(vector<Point> v)
     }
 }
 
-bool compareX(Point p1, Point p2)
-{
-    return (p1.x <= p2.x);
-}
-
-bool compareY(Point p1, Point p2)
-{
-    return (p1.y <= p2.y);
-}
-
 double calcSlope(pair<Point, Point> edge)
 {
     double slope = (edge.first.y - edge.second.y) / double((edge.first.x - edge.second.x));
@@ -70,22 +60,17 @@ pair<Point, Point> upperBridge(vector<Point> T, double median)
     }
 
     vector<pair<Point, Point>> pairs;
-    pair<Point, Point> holder;
-    //shuffle the vector and then pair them into edges
-    // srand(time(nullptr));
-    // random_shuffle(begin(temp), end(temp));
 
-    //Random indices
-    //Generate position vector
-    // vector<int> position(temp.size());
-    // iota(position.begin(), position.end(), 0);
-    // // // Random Generator
+    // Random indices
+    // Generate position vector
+    vector<int> position(T.size());
+    iota(position.begin(), position.end(), 0);
+    // // Random Generator
     // random_device random_dev;
     // mt19937 generator(random_dev());
     // shuffle(position.begin(), position.end(), generator);
+    random_shuffle(position.begin(), position.end());
 
-    vector<int> position(T.size());
-    iota(position.begin(), position.end(), 0);
     while (position.size() > 1)
     {
         Point buff_a, buff_b;
@@ -244,22 +229,19 @@ pair<Point, Point> lowerBridge(vector<Point> T, double median)
     }
 
     vector<pair<Point, Point>> pairs;
-    pair<Point, Point> holder;
-    //shuffle the vector and then pair them into edges
-    // srand(time(nullptr));
-    // random_shuffle(begin(temp), end(temp));
 
-    //Random indices
-    //Generate position vector
-    // vector<int> position(temp.size());
-    // iota(position.begin(), position.end(), 0);
-    // // Random Generator
+    // Random indices
+    // Generate position vector
+    vector<int> position(T.size());
+    iota(position.begin(), position.end(), 0);
+    // Random Generator
     // random_device random_dev;
     // mt19937 generator(random_dev());
     // shuffle(position.begin(), position.end(), generator);
 
-    vector<int> position(T.size());
-    iota(position.begin(), position.end(), 0);
+    // vector<int> position(T.size());
+    // iota(position.begin(), position.end(), 0);
+
     while (position.size() > 1)
     {
         Point buff_a, buff_b;
@@ -446,9 +428,9 @@ vector<Point> upperHull(Point p_min, Point p_max, vector<Point> T)
     Point p_l = u_bridge.first;
     Point p_r = u_bridge.second;
 
-    cout << "(" << p_l.x << ", " << p_l.y << ")"
-         << " : "
-         << "(" << p_r.x << ", " << p_r.y << ")" << endl;
+    // cout << "(" << p_l.x << ", " << p_l.y << ")"
+    //      << " : "
+    //      << "(" << p_r.x << ", " << p_r.y << ")" << endl;
 
     //T_left: all the points to the left of p_min and p_l
     T_left.push_back(p_l);
@@ -486,7 +468,7 @@ vector<Point> lowerHull(Point p_min, Point p_max, vector<Point> T)
 {
     vector<Point> lower;
     //if there is only one point remaining, return it
-    if (p_min.x == p_max.x && p_min.y == p_max.y)
+    if (samePoint(p_min, p_max))
     {
         lower.push_back(p_min);
         return lower;
@@ -518,9 +500,9 @@ vector<Point> lowerHull(Point p_min, Point p_max, vector<Point> T)
     Point p_l = l_bridge.first;
     Point p_r = l_bridge.second;
 
-    cout << "(" << p_l.x << ", " << p_l.y << ")"
-         << " : "
-         << "(" << p_r.x << ", " << p_r.y << ")" << endl;
+    // cout << "(" << p_l.x << ", " << p_l.y << ")"
+    //      << " : "
+    //      << "(" << p_r.x << ", " << p_r.y << ")" << endl;
 
     //T_left: all the points to the left of p_min and p_l
     T_left.push_back(p_l);
@@ -557,38 +539,41 @@ vector<Point> lowerHull(Point p_min, Point p_max, vector<Point> T)
 void kirkPatrickSeidel(int n)
 {
     //pmin and pmax to divide into upper and lower halves
-    // sort(S.begin(), S.end(), compareX);
-    // int x_min = S[0].x, x_max = S[n - 1].x;
     long long int x_min = LLONG_MAX, x_max = LLONG_MIN;
-
-    int i = 0;
-    vector<Point> temp;
-    //p_umin, p_lmin
-    while (i != S.size())
+    Point p_lmin, p_lmax;
+    Point p_umin, p_umax;
+    for (auto i = begin(S); i != end(S); i++)
     {
-        if (S[i].x == x_min)
+        Point holder = *i;
+        if (holder.x < x_min)
         {
-            temp.push_back(S[i]);
+            x_min = holder.x;
+            p_lmin = holder;
+            p_umin = holder;
         }
-        i++;
-    }
-    sort(temp.begin(), temp.end(), compareY);
-    Point p_lmin = temp[0];
-    Point p_umin = temp[temp.size() - 1];
-    //p_umax, p_lmax
-    temp.clear();
-    i = 0;
-    while (i != S.size())
-    {
-        if (S[i].x == x_max)
+        //if there are two/more points with same x_min, then assign separate p_umin, p_lmin
+        else if (holder.x == x_min)
         {
-            temp.push_back(S[i]);
+            if (holder.y < p_lmin.y)
+                p_lmin = holder;
+            else if (holder.y > p_umin.y)
+                p_umin = holder;
         }
-        i++;
+        if (holder.x > x_max)
+        {
+            x_max = holder.x;
+            p_lmax = holder;
+            p_umax = holder;
+        }
+        //if there are two/more points with same x_max, then assign separate p_umax, p_lmax
+        else if (holder.x == x_max)
+        {
+            if (holder.y < p_lmax.y)
+                p_lmax = holder;
+            else if (holder.y > p_umax.y)
+                p_umax = holder;
+        }
     }
-    sort(temp.begin(), temp.end(), compareY);
-    Point p_lmax = temp[0];
-    Point p_umax = temp[temp.size() - 1];
 
     vector<Point> T_upper, T_lower;
     T_lower.push_back(p_lmin);
@@ -610,6 +595,16 @@ void kirkPatrickSeidel(int n)
     // concatenate upper and lower
     upper.insert(upper.end(), lower.begin(), lower.end());
     // printVector(upper);
+
+    ofstream out_file;
+    out_file.open("output.txt");
+
+    for (auto iter = upper.begin(); iter != upper.end(); iter++)
+    {
+        out_file << (*iter).x << ", " << (*iter).y << endl;
+    }
+
+    out_file.close();
 }
 
 void saveTokenize(string str_line)
@@ -636,7 +631,7 @@ void saveTokenize(string str_line)
 int main()
 {
     string line;
-    ifstream inp_file("input.txt");
+    ifstream inp_file("input1.txt");
 
     if (inp_file.is_open())
     {
